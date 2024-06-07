@@ -10,7 +10,6 @@ const { error } = require('console');
 
 app.use(express.json());
 app.use(cors());
-
 //dataBase CONNECT
 mongoose.connect("mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/e-commerce")
 
@@ -19,9 +18,6 @@ mongoose.connect("mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.
 app.get('/',(req,res)=>{
     res.send("Express App is Running");
 })
-
-
-
 //img storage Engine
 const storage = multer.diskStorage({
     destination: './Uplode/image',
@@ -40,10 +36,6 @@ app.post('/upload',Upload.single('product'),(req,res)=>{
         Image_url: `http://localhost:${port}/image/${req.file.filename}`
     })
 })
-
-
-
-
 
 app.listen(port,(error)=>{
     if(!error){
