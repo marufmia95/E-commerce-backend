@@ -37,6 +37,21 @@ app.post('/upload',Upload.single('product'),(req,res)=>{
     })
 })
 
+// Schema for creating Products
+const product = mongoose.model('Product',{
+    id:{
+        type:Number,
+        required:true,
+    }
+    name:{
+        type:String,
+    }
+})
+
+
+
+
+
 app.listen(port,(error)=>{
     if(!error){
         console.log("Server is running on port " +port);
