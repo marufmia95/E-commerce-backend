@@ -6,82 +6,122 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
-const { error } = require('console');
 
+// Middleware
 app.use(express.json());
 app.use(cors());
-//dataBase CONNECT
-mongoose.connect("mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/e-commerce")
 
-//api creation
+// MongoDB Connection
+const dbURI = "mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/e-commerce";
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+    .then(() => console.log('MongoDB connected...'))
+    .catch(err => console.log('MongoDB connection error: ', err));
 
-app.get('/',(req,res)=>{
+// Root Route
+app.get('/', (req, res) => {
     res.send("Express App is Running");
-})
-//img storage Engine
+});
+
+// Image Storage Engine
 const storage = multer.diskStorage({
-    destination: './Uplode/image',
-    filename:(req,file,cb)=>{
-        return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+    destination: './upload/image',  // Corrected the folder name
+    filename: (req, file, cb) => {
+        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
     }
-})
+});
 
-const Upload = multer ({storage:storage})
+const upload = multer({ storage: storage });
 
-//creating Upload instance
-app.use('/image',express.static('upload/image'))
-app.post('/upload',Upload.single('product'),(req,res)=>{
+// Serve Images
+app.use('/image', express.static('upload/image'));
+
+// Upload Route
+app.post('/upload', upload.single('product'), (req, res) => {
     res.json({
-        success:1,
-        Image_url: `http://localhost:${port}/image/${req.file.filename}`
-    })
-})
+        success: 1,
+        image_url: `http://localhost:${port}/image/${req.file.filename}`
+    });
+});
 
-// Schema for creating Products
-const product = mongoose.model('Product',{
-    id:{
-        type:Number,
-        required:true,
+// Product Schema
+const productSchema = new mongoose.Schema({
+    id: {
+        type: Number,
+        required: true,
     },
-    name:{
-        type:String,
-        required:true,
+    name: {
+        type: String,
+        required: true,
     },
-    image:{
-        type:String,
-        required:true,
+    image: {
+        type: String,
+        required: true,
     },
-    category:{
-        type:String,
-        required:true,
+    category: {
+        type: String,
+        required: true,
     },
-    new_price:{
-        type:Number,
-        required:true,
+    new_price: {
+        type: Number,
+        required: true,
     },
-    old_price:{
-        type:Number,
-        required:true,
+    old_price: {
+        type: Number,
+        required: true,
     },
-    date:{
-        type:Date,
-        required:Date.now,
+    date: {
+        type: Date,
+        default: Date.now,
     },
-    avilabl:{
-        type:Boolean,
-        required:true,
+    available: {
+        type: Boolean,
+        required: true,
     },
-})
+});
 
+const Product = mongoose.model('Product', productSchema);
 
+// Add Product Route
+app.post('/addproduct', async (req, res) => {
+    const product = new Product({
+        id: req.body.id,
+        name: req.body.name,
+        image: req.body.image,
+        category: req.body.category,
+        new_price: req.body.new_price,
+        old_price: req.body.old_price,
+        available: req.body.available,
+    });
 
-
-
-app.listen(port,(error)=>{
-    if(!error){
-        console.log("Server is running on port " +port);
+    try {
+        await product.save();
+        res.json({
+            success: true,
+            name: req.body.name,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Failed to add product',
+            error: error.message,
+        });
     }
-    else{
-        console.log("Error : " +error);
+});
+
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        console.error('Bad JSON');
+        return res.status(400).send({ success: false, message: 'Invalid JSON' });
     }
-})
+    next();
+});
+
+// Start Server
+app.listen(port, (error) => {
+    if (!error) {
+        console.log("Server is running on port " + port);
+    } else {
+        console.log("Error: " + error);
+    }
+});
