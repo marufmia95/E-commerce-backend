@@ -1,4 +1,4 @@
-const port = 4000;
+const port = 5000; // Change the port to 5000
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -7,17 +7,16 @@ const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
 
-// Middleware
 app.use(express.json());
 app.use(cors());
 
 // MongoDB Connection
 const dbURI = "mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/e-commerce";
-mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(dbURI)
     .then(() => console.log('MongoDB connected...'))
     .catch(err => console.log('MongoDB connection error: ', err));
 
-// Root Route
+// API Creation
 app.get('/', (req, res) => {
     res.send("Express App is Running");
 });
@@ -26,16 +25,14 @@ app.get('/', (req, res) => {
 const storage = multer.diskStorage({
     destination: './upload/image',  // Corrected the folder name
     filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
+        return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`);
     }
 });
 
 const upload = multer({ storage: storage });
 
-// Serve Images
+// Creating Upload Instance
 app.use('/image', express.static('upload/image'));
-
-// Upload Route
 app.post('/upload', upload.single('product'), (req, res) => {
     res.json({
         success: 1,
@@ -43,8 +40,8 @@ app.post('/upload', upload.single('product'), (req, res) => {
     });
 });
 
-// Product Schema
-const productSchema = new mongoose.Schema({
+// Schema for creating Products
+const Product = mongoose.model('Product', {
     id: {
         type: Number,
         required: true,
@@ -71,7 +68,7 @@ const productSchema = new mongoose.Schema({
     },
     date: {
         type: Date,
-        default: Date.now,
+        default: Date.now,  // Fixed the default value for the date
     },
     available: {
         type: Boolean,
@@ -79,9 +76,6 @@ const productSchema = new mongoose.Schema({
     },
 });
 
-const Product = mongoose.model('Product', productSchema);
-
-// Add Product Route
 app.post('/addproduct', async (req, res) => {
     const product = new Product({
         id: req.body.id,
@@ -90,31 +84,15 @@ app.post('/addproduct', async (req, res) => {
         category: req.body.category,
         new_price: req.body.new_price,
         old_price: req.body.old_price,
-        available: req.body.available,
+        available: req.body.available,  // Added the missing field
     });
-
-    try {
-        await product.save();
-        res.json({
-            success: true,
-            name: req.body.name,
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Failed to add product',
-            error: error.message,
-        });
-    }
-});
-
-// Error Handling Middleware
-app.use((err, req, res, next) => {
-    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-        console.error('Bad JSON');
-        return res.status(400).send({ success: false, message: 'Invalid JSON' });
-    }
-    next();
+    console.log(product);
+    await product.save();
+    console.log("save");
+    res.json({
+        success: true,
+        name: req.body.name,
+    });
 });
 
 // Start Server
