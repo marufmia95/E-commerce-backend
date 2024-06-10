@@ -26,14 +26,14 @@ const storage = multer.diskStorage({
     }
 })
 
-const Upload = multer ({storage:storage})
+const Upload = multer({storage:storage})
 
 //creating Upload instance
 app.use('/image',express.static('upload/image'))
 app.post('/upload',Upload.single('product'),(req,res)=>{
     res.json({
         success:1,
-        Image_url: `http://localhost:${port}/image/${req.file.filename}`
+        image_url:`http://localhost:${port}/image/${req.file.filename}`
     })
 })
 
@@ -65,11 +65,11 @@ const product = mongoose.model('Product',{
     },
     date:{
         type:Date,
-        required:Date.now,
+        default:Date.now,
     },
     avilable:{
         type:Boolean,
-        required:true,
+        default:true,
     },
 })
 
