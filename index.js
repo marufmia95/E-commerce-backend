@@ -1,21 +1,27 @@
-const port = 4000;
 const express = require('express');
-const app = express();
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // Ensure this is declared only once
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
 
+const app = express();
+const port = 4000;
+
 app.use(express.json());
 app.use(cors());
 
 // Database connection
-mongoose.connect("mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/e-commerce", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+const uri = "mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/e-commerce?retryWrites=true&w=majority";
+// mongodb+srv://ecommerce_bk:<password>@cluster0.ihlvv5z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+// mongodb+srv://ecommerce_bk:<password>@cluster0.ihlvv5z.mongodb.net/
+mongoose.connect(uri, {
+    ssl: true
 }).then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+  .catch(err => {
+      console.error('MongoDB connection error:', err);
+      process.exit(1); // Exit the process with an error code
+  });
 
 // API endpoint
 app.get('/', (req, res) => {
