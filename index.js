@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(cors());
 
 // Database connection
-const uri = "mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/e-commerce?retryWrites=true&w=majority";
+const uri = "mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/";
 // mongodb+srv://ecommerce_bk:<password>@cluster0.ihlvv5z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 // mongodb+srv://ecommerce_bk:<password>@cluster0.ihlvv5z.mongodb.net/
 mongoose.connect(uri, {
