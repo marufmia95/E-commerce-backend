@@ -12,11 +12,13 @@ app.use(express.json());
 app.use(cors());
 
 // Database connection
-const uri = "mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/";
-// mongodb+srv://ecommerce_bk:<password>@cluster0.ihlvv5z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-// mongodb+srv://ecommerce_bk:<password>@cluster0.ihlvv5z.mongodb.net/
+// const mongoose = require('mongoose');
+
+const uri = "mongodb+srv://ecommerce_bk:ecommerce@cluster0.ihlvv5z.mongodb.net/e-commerce?retryWrites=true&w=majority";
+
 mongoose.connect(uri, {
-    ssl: true
+    ssl: true,
+    connectTimeoutMS: 10000,  // Adding a connection timeout
 }).then(() => console.log('MongoDB connected'))
   .catch(err => {
       console.error('MongoDB connection error:', err);
